@@ -13,6 +13,7 @@ namespace population
 
 	void generate_initial();
 	void evaluate();
+	void select();
 	void crossover();
 	void mutate();
 	bool converged();

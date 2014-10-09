@@ -6,7 +6,8 @@
 
 namespace data
 {
-	extern std::vector<geometry::line_t> walls;
+	extern std::vector<line_t> walls;
+	extern circle_t allowed_region;
 	void read_walls(FILE* f_walls);
 	void write_walls(FILE* f_walls);
 }

@@ -24,10 +24,13 @@ int main()
 	load_data();
 	evaluator::init();
 
+	data::allowed_region = {38, 20, 5};
+
 	population::generate_initial();
 	do 
 	{
 		population::evaluate();
+		population::select();
 		population::crossover();
 		population::mutate();
 	} while (!population::converged());

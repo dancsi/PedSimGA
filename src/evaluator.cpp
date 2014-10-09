@@ -12,8 +12,10 @@
 #include "population.h"
 
 using namespace std;
+using namespace evaluator;
 
 vector<string> evaluator::directory_names;
+vector<FILE*> evaluator::executable_pipes;
 
 const char* working_dir_name = "GA";
 const char* executable_name = "PedestrianSimulator.exe";
@@ -53,13 +55,23 @@ void evaluator::create_directories()
 	for (string& dirname : directory_names)
 	{
 		mkdir(dirname.c_str());
+		chdir(dirname.c_str());
+		mkdir("logs");
+		chdir("..");
 	}
 	chdir("..");
 }
 
 void evaluator::open_pipes()
 {
-	
+	executable_pipes.clear();
+	chdir(working_dir);
+	for (int i = 0; i < population::size; i++)
+	{
+		chdir(directory_names[i].c_str());
+		executable_pipes.push_back(_popen(executable_cmdline, "r"));
+		chdir("..");
+	}
 }
 
 void evaluator::init()
@@ -70,10 +82,24 @@ void evaluator::init()
 	{
 		_fullpath(executable_path, executable_name, sizeof(executable_path));
 	}
+	else
+	{
+		fprintf(stderr, "%s not found", executable_name);
+		exit(1);
+	}
 	if (access(config_ini_name, 0) == 0)
 	{
 		_fullpath(config_ini_path, config_ini_name, sizeof(config_ini_path));
 	}
+	else
+	{
+		fprintf(stderr, "%s not found", config_ini_name);
+		exit(1);
+	}
+
+	strcpy(executable_cmdline, executable_path);
+	strcat(executable_cmdline, " ");
+	strcat(executable_cmdline, config_ini_path);
 
 	create_directories();
 }
@@ -81,13 +107,24 @@ void evaluator::init()
 void evaluator::prepare_step()
 {
 	chdir(working_dir);
-	for (string subdir : directory_names)
+	for (int i = 0; i < population::size; i++)
 	{
+		string subdir = directory_names[i];
 		chdir(subdir.c_str());
 		FILE* f_walls = fopen("walls.dat", "w");
 		data::write_walls(f_walls);
-
+		population::population[i].write(f_walls);
 		fclose(f_walls);
 		chdir("..");
+	}
+}
+
+void evaluator::read_results()
+{
+	for (int i = 0; i < population::size; i++)
+	{
+		fscanf(executable_pipes[i], "%f", &population::population[i].fitness);
+		fprintf(stderr, "%d: fitness %f\n", i, population::population[i].fitness);
+		fclose(executable_pipes[i]);
 	}
 }
