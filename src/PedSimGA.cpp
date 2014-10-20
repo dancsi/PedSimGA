@@ -26,6 +26,8 @@ int main()
 
 	data::allowed_region = {38, 20, 5};
 
+	int total_generations = 15;
+
 	population::generate_initial();
 	do 
 	{
@@ -34,17 +36,20 @@ int main()
 		population::crossover();
 		population::mutate();
 		population::show_statistics();
-		fprintf(stderr, "Continue Y/N?\n");
-		char c = getchar();
-		if (toupper(c) == 'N')
+		if (population::n_generations == total_generations)
 		{
-			evaluator::finish();
-			break;
+			fprintf(stderr, "How many additional generations?\n");
+			int additional;
+			scanf("%d", &additional);
+			total_generations += additional;
+			if (!additional)
+			{
+				evaluator::finish();
+				break;
+			}
 		}
-		else
-		{
-			population::population.swap(population::new_population);
-		}
+		
+		population::population.swap(population::new_population);
 		
 	} while (!population::converged());
 
