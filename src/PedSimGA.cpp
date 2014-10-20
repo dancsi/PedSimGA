@@ -12,7 +12,6 @@ using namespace std;
 
 void load_data()
 {
-	population::size = 10;
 	FILE* f_walls = fopen("walls.dat", "r");
 	if (!f_walls) return;
 	data::read_walls(f_walls);
@@ -21,12 +20,16 @@ void load_data()
 
 int main()
 {
+	fprintf(stderr, "Population size?\n");
+	scanf("%u", &population::size);
+	int total_generations;
+	fprintf(stderr, "How many generations?\n");
+	scanf("%d", &total_generations);
+
 	load_data();
 	evaluator::init();
 
 	data::allowed_region = {38, 20, 5};
-
-	int total_generations = 15;
 
 	population::generate_initial();
 	do 
