@@ -22,8 +22,7 @@ void population::evaluate()
 {
 	n_generations++;
 	evaluator::prepare_step();
-	evaluator::open_pipes();
-	evaluator::read_results();
+	evaluator::run();
 	sort(population.begin(), population.end());
 }
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <vector>
+#include <chrono>
 
 #include "data.h"
 #include "evaluator.h"
@@ -34,11 +35,14 @@ int main()
 	population::generate_initial();
 	do 
 	{
+		auto start_time = chrono::high_resolution_clock::now();
 		population::evaluate();
 		population::select();
 		population::crossover();
 		population::mutate();
+		auto end_time = chrono::high_resolution_clock::now();
 		population::show_statistics();
+		fprintf(stderr, "Wall time elapsed: %.3lfs\n", chrono::duration<double>(end_time-start_time).count());
 		if (population::n_generations == total_generations)
 		{
 			fprintf(stderr, "How many additional generations?\n");

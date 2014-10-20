@@ -5,8 +5,11 @@
 #include <sys/types.h>  // For stat().
 #include <sys/stat.h>   // For stat().
 
+#include <windows.h>
+
 #include <cstring>
 #include <cstdio>
+#include <thread>
 
 #include "data.h"
 #include "population.h"
@@ -132,4 +135,56 @@ void evaluator::read_results()
 void evaluator::finish()
 {
 	prepare_step();
+}
+
+#define FAST_EVALUATOR
+
+void evaluator::run()
+{
+#ifdef FAST_EVALUATOR
+	int n_processes = std::thread::hardware_concurrency() * 2;
+	if (!n_processes) 
+		n_processes = 4;
+
+	chdir(working_dir);
+	int n_completed = 0, next_idx = 0;
+	vector<pair<HANDLE, int>> pipes;
+
+	while (n_completed < population::size)
+	{
+		while (next_idx < population::size && pipes.size() < n_processes)
+		{
+			chdir(directory_names[next_idx].c_str());
+			FILE* fp = _popen(executable_cmdline, "r");
+			HANDLE hnd = (HANDLE)_get_osfhandle(fileno(fp));
+			pipes.push_back(make_pair(hnd, next_idx));
+			chdir("..");
+
+			next_idx++;
+		}
+
+		HANDLE* handles = new HANDLE[pipes.size()];
+
+		for (int i = 0; i < pipes.size(); i++)
+		{
+			handles[i] = pipes[i].first;
+		}
+		
+		int finished_idx = WaitForMultipleObjects(pipes.size(), handles, FALSE, INFINITE) - WAIT_OBJECT_0;
+		n_completed++;
+
+		int fh = _open_osfhandle((long) handles[finished_idx], 0);
+		FILE* fd = _fdopen(fh, "r");
+		float fl;
+		fscanf(fd, "%f", &fl);
+		fprintf(stderr, "Read float %f\n", fl);
+		population::population[pipes[finished_idx].second].fitness = fl;
+		pipes.erase(pipes.begin() + finished_idx);
+		fclose(fd); 
+		delete handles;
+	}
+#else
+	evaluator::open_pipes();
+	evaluator::read_results();
+#endif
 }

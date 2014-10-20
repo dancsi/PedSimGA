@@ -10,6 +10,7 @@ namespace evaluator
 	void open_pipes();
 	void read_results();
 	void prepare_step();
+	void run();
 	void finish();
 
 	extern std::vector<std::string> directory_names;
