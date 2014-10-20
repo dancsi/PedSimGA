@@ -5,6 +5,7 @@
 #include "evaluator.h"
 
 vector<solution_t> population::population, population::new_population;
+vector<float> population::selection_weights;
 size_t population::size;
 size_t population::last_feasible_index;
 int population::n_generations;
@@ -38,18 +39,18 @@ int weighted_random_select(vector<float>& weights)
 
 void population::crossover()
 {
-	vector<float> weights;
+	selection_weights.clear();
 	float best_fitness = population[0].fitness, sum = 0;
 	for (int i = 0; i < last_feasible_index; i++)
 	{
-		weights.push_back(best_fitness/population[i].fitness);
-		sum += weights[i];
+		selection_weights.push_back(best_fitness/population[i].fitness);
+		sum += selection_weights[i];
 	}
-	for (float& weight : weights) weight /= sum;
+	for (float& weight : selection_weights) weight /= sum;
 	int n_offsprings = last_feasible_index / 2;
 	for (int i = 0; i < n_offsprings; i++)
 	{
-		int a = weighted_random_select(weights), b = weighted_random_select(weights);
+		int a = weighted_random_select(selection_weights), b = weighted_random_select(selection_weights);
 		new_population.push_back(population[a].crossover(population[b]));
 	}
 	for (int i = 0; i < n_offsprings; i++)
@@ -62,7 +63,8 @@ void population::mutate()
 {
 	while (new_population.size()<population::size)
 	{
-		new_population.push_back(solution_t::random());
+		new_population.push_back(population[weighted_random_select(selection_weights)]);
+		new_population.rbegin()->mutate();
 	}
 }
 
@@ -75,7 +77,7 @@ void population::select()
 {
 	float best_fitness = population[0].fitness;
 	last_feasible_index = 0;
-	for (int i = 0; i < population::size && (population[i].fitness/best_fitness < 2.5); i++, last_feasible_index++);
+	for (int i = 0; i < population::size && (population[i].fitness/best_fitness < 5); i++, last_feasible_index++);
 	new_population.clear();
 }
 

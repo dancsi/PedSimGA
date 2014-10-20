@@ -32,6 +32,15 @@ struct solution_t
 		}
 		return sol;
 	}
+	void mutate()
+	{
+		static std::mt19937 eng(123);
+		std::normal_distribution<float> dist(1, 0.15);
+		for (int i = 0; i < n_points; i++)
+		{
+			points[i] = (points[i] - data::allowed_region) * dist(eng) + data::allowed_region;
+		}
+	}
 	solution_t crossover(solution_t& other)
 	{
 		static std::mt19937 eng;

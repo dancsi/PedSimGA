@@ -9,6 +9,7 @@ using namespace std;
 namespace population
 {
 	extern vector<solution_t> population, new_population;
+	extern vector<float> selection_weights;
 	extern size_t size;
 	extern size_t last_feasible_index;
 	extern int n_generations;
