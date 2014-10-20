@@ -52,7 +52,6 @@ void evaluator::create_directories()
 	{
 		sprintf(buf, format_string, i);
 		directory_names.push_back(string(buf));
-		printf("%s\n", buf);
 	}
 
 	for (string& dirname : directory_names)
@@ -137,12 +136,12 @@ void evaluator::finish()
 	prepare_step();
 }
 
-#define FAST_EVALUATOR
+//#define FAST_EVALUATOR
 
 void evaluator::run()
 {
 #ifdef FAST_EVALUATOR
-	int n_processes = std::thread::hardware_concurrency() * 2;
+	int n_processes = /*std::thread::hardware_concurrency() * 2*/10;
 	if (!n_processes) 
 		n_processes = 4;
 
@@ -177,7 +176,6 @@ void evaluator::run()
 		FILE* fd = _fdopen(fh, "r");
 		float fl;
 		fscanf(fd, "%f", &fl);
-		fprintf(stderr, "Read float %f\n", fl);
 		population::population[pipes[finished_idx].second].fitness = fl;
 		pipes.erase(pipes.begin() + finished_idx);
 		fclose(fd); 
