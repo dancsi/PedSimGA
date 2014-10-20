@@ -7,6 +7,7 @@
 vector<solution_t> population::population, population::new_population;
 size_t population::size;
 size_t population::last_feasible_index;
+int population::n_generations;
 
 void population::generate_initial()
 {
@@ -18,6 +19,7 @@ void population::generate_initial()
 
 void population::evaluate()
 {
+	n_generations++;
 	evaluator::prepare_step();
 	evaluator::open_pipes();
 	evaluator::read_results();
@@ -75,4 +77,11 @@ void population::select()
 	last_feasible_index = 0;
 	for (int i = 0; i < population::size && (population[i].fitness/best_fitness < 2.5); i++, last_feasible_index++);
 	new_population.clear();
+}
+
+void population::show_statistics()
+{
+	fprintf(stderr, "***GENERATION %4d***\n", n_generations);
+	fprintf(stderr, "Best: %4.4f, Worst %4.4f\n", population[0].fitness, population[last_feasible_index-1].fitness);
+
 }

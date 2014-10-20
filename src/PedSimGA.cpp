@@ -33,7 +33,19 @@ int main()
 		population::select();
 		population::crossover();
 		population::mutate();
-		population::population.swap(population::new_population);
+		population::show_statistics();
+		fprintf(stderr, "Continue Y/N?\n");
+		char c = getchar();
+		if (toupper(c) == 'N')
+		{
+			evaluator::finish();
+			break;
+		}
+		else
+		{
+			population::population.swap(population::new_population);
+		}
+		
 	} while (!population::converged());
 
 	return 0;

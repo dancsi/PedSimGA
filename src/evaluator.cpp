@@ -124,7 +124,12 @@ void evaluator::read_results()
 	for (int i = 0; i < population::size; i++)
 	{
 		fscanf(executable_pipes[i], "%f", &population::population[i].fitness);
-		fprintf(stderr, "%d: fitness %f\n", i, population::population[i].fitness);
+		//fprintf(stderr, "%d: fitness %f\n", i, population::population[i].fitness);
 		fclose(executable_pipes[i]);
 	}
+}
+
+void evaluator::finish()
+{
+	prepare_step();
 }
