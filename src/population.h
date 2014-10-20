@@ -8,8 +8,9 @@ using namespace std;
 
 namespace population
 {
-	extern vector<solution_t> population;
+	extern vector<solution_t> population, new_population;
 	extern size_t size;
+	extern size_t last_feasible_index;
 
 	void generate_initial();
 	void evaluate();

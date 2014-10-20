@@ -33,6 +33,7 @@ int main()
 		population::select();
 		population::crossover();
 		population::mutate();
+		population::population.swap(population::new_population);
 	} while (!population::converged());
 
 	return 0;
