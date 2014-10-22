@@ -6,6 +6,7 @@
 #include <sys/stat.h>   // For stat().
 
 #include <windows.h>
+#include <fcntl.h>
 
 #include <cstring>
 #include <cstdio>
@@ -136,7 +137,7 @@ void evaluator::finish()
 	prepare_step();
 }
 
-//#define FAST_EVALUATOR
+#define FAST_EVALUATOR
 
 void evaluator::run()
 {
@@ -147,7 +148,7 @@ void evaluator::run()
 
 	chdir(working_dir);
 	int n_completed = 0, next_idx = 0;
-	vector<pair<HANDLE, int>> pipes;
+	vector<tuple<int, FILE*, HANDLE>> pipes;
 
 	while (n_completed < population::size)
 	{
@@ -156,7 +157,7 @@ void evaluator::run()
 			chdir(directory_names[next_idx].c_str());
 			FILE* fp = _popen(executable_cmdline, "r");
 			HANDLE hnd = (HANDLE)_get_osfhandle(fileno(fp));
-			pipes.push_back(make_pair(hnd, next_idx));
+			pipes.push_back(make_tuple(next_idx, fp, hnd));
 			chdir("..");
 
 			next_idx++;
@@ -166,19 +167,28 @@ void evaluator::run()
 
 		for (int i = 0; i < pipes.size(); i++)
 		{
-			handles[i] = pipes[i].first;
+			handles[i] = get<2>(pipes[i]);
 		}
 		
-		int finished_idx = WaitForMultipleObjects(pipes.size(), handles, FALSE, INFINITE) - WAIT_OBJECT_0;
+		DWORD WaitResult = WaitForMultipleObjects(pipes.size(), handles, FALSE, INFINITE);
+		if (WaitResult == WAIT_FAILED || WaitResult == -WAIT_ABANDONED_0)
+		{
+			continue;
+		}
+		int finished_idx = WaitResult - WAIT_OBJECT_0;
 		n_completed++;
 
-		int fh = _open_osfhandle((long) handles[finished_idx], 0);
-		FILE* fd = _fdopen(fh, "r");
+		FILE* fd = get<1>(pipes[finished_idx]);
+		if (fd == nullptr)
+		{
+			__debugbreak();
+			continue;
+		}
 		float fl;
-		fscanf(fd, "%f", &fl);
-		population::population[pipes[finished_idx].second].fitness = fl;
+		std::fscanf(fd, "%f", &fl);
+		population::population[get<0>(pipes[finished_idx])].fitness = fl;
 		pipes.erase(pipes.begin() + finished_idx);
-		fclose(fd); 
+		std::fclose(fd); 
 		delete handles;
 	}
 #else

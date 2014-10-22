@@ -30,7 +30,7 @@ int main()
 	load_data();
 	evaluator::init();
 
-	data::allowed_region = {38, 20, 5};
+	data::allowed_region = {37, 20, 1.5};
 
 	population::generate_initial();
 	do 
