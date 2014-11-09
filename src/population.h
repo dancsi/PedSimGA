@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <random>
 
 #include "solution.h"
 
@@ -22,4 +23,12 @@ namespace population
 	bool converged();
 
 	void show_statistics();
+
+	namespace weighted_random
+	{
+		extern std::discrete_distribution<> dist;
+		extern std::mt19937 generator;
+		void reset(std::vector<float>& weights);
+		int select();
+	};
 }
