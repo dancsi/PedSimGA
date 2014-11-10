@@ -68,10 +68,12 @@ struct solution_t
 #else
 	bool grid[grid_size][grid_size];
 	bool edge_field[grid_size][grid_size];
+	std::mt19937 eng;
 
 	solution_t()
 	{
 		memset(grid, 0, sizeof(grid));
+		eng = std::mt19937(123);
 	}
 
 	bool visited[grid_size][grid_size];
@@ -119,7 +121,7 @@ struct solution_t
 	static solution_t random()
 	{
 		static std::mt19937 eng(123);
-		std::bernoulli_distribution dist(.4);
+		std::bernoulli_distribution dist(.5);
 
 		solution_t sol;
 
@@ -135,7 +137,6 @@ struct solution_t
 	void mutate()
 	{
 		const float mutation_percentage = 0.5;
-		static std::mt19937 eng(123);
 		std::bernoulli_distribution dist(mutation_percentage);
 
 		find_edge_fields();
@@ -153,7 +154,6 @@ struct solution_t
 	}
 	solution_t crossover(solution_t& other)
 	{
-		static std::mt19937 eng(123);
 		std::bernoulli_distribution dist(other.fitness / (fitness + other.fitness));
 
 		solution_t sol;

@@ -55,7 +55,7 @@ void population::mutate()
 	while (new_population.size() < population::size)
 	{
 		new_population.push_back(population[weighted_random::select()]);
-		new_population.rbegin()->mutate();
+		new_population.back().mutate();
 	}
 }
 
